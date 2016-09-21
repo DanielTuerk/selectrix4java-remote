@@ -1,4 +1,4 @@
-package net.wbz.selectrix4java.remote;
+package net.wbz.selectrix4java.remote.server;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 /**
  * @author Daniel Tuerk
  */
-@ServerEndpoint(value = "/game")
+@ServerEndpoint(value = "/test")
 public class TestServerEndPoint {
 
     private Logger logger = Logger.getLogger(this.getClass().getName());
@@ -26,22 +26,21 @@ public class TestServerEndPoint {
         this.session = session;
         logger.info("Connected ... " + this.session.getId());
 
-        foo();
+        start();
     }
 
     @OnMessage
     public void onMessage(String message, Session session) {
-        logger.info("Received from client ("+session.getId()+"): " + message);
+        logger.info("Received from client (" + session.getId() + "): " + message);
         switch (message) {
             case "quit":
                 try {
-                    session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Game ended"));
+                    session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Session ended"));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
                 break;
         }
-//        return "server: " +message;
     }
 
     @OnClose
@@ -49,19 +48,17 @@ public class TestServerEndPoint {
         logger.info(String.format("Session %s closed because of %s", session.getId(), closeReason));
     }
 
-    public void foo() {
-
+    public void start() {
         ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("serial-io-executor-%d").build();
         ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(namedThreadFactory);
         scheduledExecutorService.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
                 try {
-                    session.getBasicRemote().sendText("test "+ new Date().toString());
+                    session.getBasicRemote().sendText("test " + new Date().toString());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
             }
         }, 0L, 2000L, TimeUnit.MILLISECONDS);
     }

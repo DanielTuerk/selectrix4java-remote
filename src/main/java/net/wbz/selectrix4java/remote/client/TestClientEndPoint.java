@@ -1,4 +1,4 @@
-package net.wbz.selectrix4java.remote;
+package net.wbz.selectrix4java.remote.client;
 
 import org.glassfish.tyrus.client.ClientManager;
 
@@ -18,16 +18,14 @@ import java.util.logging.Logger;
 public class TestClientEndPoint {
 
     private Logger logger = Logger.getLogger(this.getClass().getName());
-    private static CountDownLatch latch;
+    private static CountDownLatch LATCH;
     private Session session;
-
 
     @OnOpen
     public void onOpen(Session session) {
         logger.info("Connected ... " + session.getId());
         try {
             this.session = session;
-
             this.session.getBasicRemote().sendText("start");
             sender();
         } catch (IOException e) {
@@ -35,49 +33,43 @@ public class TestClientEndPoint {
         }
     }
 
-
     @OnMessage
     public void onMessage(String message, Session session) {
-            logger.info("Received from " + session.getId() + ": " + message);
+        logger.info("Received from " + session.getId() + ": " + message);
     }
 
     public void sender() {
-      new Thread(new Runnable() {
-          @Override
-          public void run() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-              BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-              try {
-                  String userInput = bufferRead.readLine();
-                  session.getAsyncRemote().sendText(userInput);
-                  Thread.sleep(100L);
-                  sender();
-              } catch (IOException e) {
-                  e.printStackTrace();
-              } catch (InterruptedException e) {
-                  e.printStackTrace();
-              }
+                BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+                try {
+                    String userInput = bufferRead.readLine();
+                    session.getAsyncRemote().sendText(userInput);
+                    Thread.sleep(100L);
+                    sender();
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-          }
-      }).start();
-
-
-
+            }
+        }).start();
     }
 
     @OnClose
     public void onClose(Session session, CloseReason closeReason) {
         logger.info(String.format("Session %s close because of %s", session.getId(), closeReason));
-        latch.countDown();
+        LATCH.countDown();
     }
 
     public static void main(String[] args) {
-        latch = new CountDownLatch(1);
+        LATCH = new CountDownLatch(1);
 
         ClientManager client = ClientManager.createClient();
         try {
-            client.connectToServer(TestClientEndPoint.class, new URI("ws://localhost:8025/websockets/game"));
-            latch.await();
+            client.connectToServer(TestClientEndPoint.class, new URI("ws://localhost:8025/websockets/test"));
+            LATCH.await();
 
         } catch (DeploymentException | URISyntaxException | InterruptedException e) {
             throw new RuntimeException(e);

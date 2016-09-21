@@ -1,3 +1,3 @@
 # selectrix4java-remote
 
-todo
+Library to use selectrix4java remote by WebSockets.

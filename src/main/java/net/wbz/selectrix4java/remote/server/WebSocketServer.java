@@ -1,4 +1,4 @@
-package net.wbz.selectrix4java.remote;
+package net.wbz.selectrix4java.remote.server;
 
 import org.glassfish.tyrus.server.Server;
 

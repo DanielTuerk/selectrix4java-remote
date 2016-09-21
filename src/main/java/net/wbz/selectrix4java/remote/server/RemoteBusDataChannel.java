@@ -1,9 +1,10 @@
-package net.wbz.selectrix4java.remote;
+package net.wbz.selectrix4java.remote.server;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.wbz.selectrix4java.bus.BusDataReceiver;
 import net.wbz.selectrix4java.data.BusData;
 import net.wbz.selectrix4java.data.BusDataChannel;
+import net.wbz.selectrix4java.remote.TransferData;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -43,20 +44,10 @@ public class RemoteBusDataChannel extends BusDataChannel {
     public void onOpen(Session session) {
         logger.info("Connected ... " + session.getId());
         this.session = session;
-
-//            this.session.getBasicRemote().sendText("start");
-//            sender();
     }
-
-//    @OnMessage
-//    public void onMessage(String message, Session session) {
-//        logger.info("Received from " + session.getId() + ": " + message);
-//    }
 
     @Override
     public void start() {
-        // websocket open
-        // on message
         busDataMessageHandler = new BusDataMessageHandler();
         resume();
     }
